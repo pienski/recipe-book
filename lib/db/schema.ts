@@ -39,6 +39,7 @@ export const mealPlan = pgTable(
     recipe_id: text("recipe_id").references(() => recipes.id, {
       onDelete: "cascade",
     }),
+    custom_title: text("custom_title"), // Custom title for placeholder meals
     // How many servings to cook for this slot — drives grocery-list scaling.
     servings: integer("servings").notNull().default(2),
     created_at: timestamp("created_at").notNull().defaultNow(),

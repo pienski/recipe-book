@@ -46,6 +46,7 @@ export async function POST(request: Request) {
       return new NextResponse("Missing recipe_id", { status: 400 });
     }
     const recipe_id: string | null = body.recipe_id ?? null;
+    const custom_title: string | null = body.custom_title ?? null;
 
     // Servings to cook for this slot (drives grocery scaling). Default 2.
     const parsedServings = Number(body.servings);
@@ -67,10 +68,10 @@ export async function POST(request: Request) {
     // means re-assigning an occupied slot just overwrites it.
     await db
       .insert(mealPlan)
-      .values(dates.map((date) => ({ date, category, recipe_id, servings })))
+      .values(dates.map((date) => ({ date, category, recipe_id, custom_title, servings })))
       .onConflictDoUpdate({
         target: [mealPlan.date, mealPlan.category],
-        set: { recipe_id, servings },
+        set: { recipe_id, custom_title, servings },
       });
 
     // Return the joined shape the calendar cells need for an optimistic update
@@ -79,7 +80,7 @@ export async function POST(request: Request) {
       dates,
       category,
       recipe_id,
-      title: recipe?.title ?? null,
+      title: recipe?.title ?? (custom_title || "No meal"),
       photo_url: recipe?.photo_url ?? null,
       photo_position: recipe?.photo_position ?? null,
       servings,

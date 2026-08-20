@@ -37,6 +37,7 @@ export async function getWeekPlan(mondayISO: string): Promise<WeekPlan> {
       category: mealPlan.category,
       recipe_id: mealPlan.recipe_id,
       title: recipes.title,
+      custom_title: mealPlan.custom_title,
       photo_url: recipes.photo_url,
       photo_position: recipes.photo_position,
       servings: mealPlan.servings,
@@ -48,7 +49,15 @@ export async function getWeekPlan(mondayISO: string): Promise<WeekPlan> {
 
   const plan: WeekPlan = {};
   for (const row of rows) {
-    plan[`${row.date}|${row.category}`] = row;
+    plan[`${row.date}|${row.category}`] = {
+      date: row.date,
+      category: row.category,
+      recipe_id: row.recipe_id,
+      title: row.recipe_id ? row.title : (row.custom_title || "No meal"),
+      photo_url: row.photo_url,
+      photo_position: row.photo_position,
+      servings: row.servings,
+    };
   }
   return plan;
 }

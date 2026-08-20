@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Ban, ChevronLeft, ChevronRight, Copy, Pencil, Plus, X } from "lucide-react";
+import { Ban, ChevronLeft, ChevronRight, Copy, Pencil, Plus, X, Utensils } from "lucide-react";
 import { addWeeks, getWeekDates, getWeekStart, getTodayISO } from "@/lib/dates";
 import { cn, getTagStyles } from "@/lib/utils";
 import type { PlannedMeal, WeekPlan } from "@/lib/actions/meal-plan";
@@ -79,7 +79,7 @@ export default function MealPlanCalendar({
       category,
       presetRecipe:
         meal.recipe_id === null
-          ? NO_MEAL_ITEM
+          ? { ...NO_MEAL_ITEM, title: meal.title || "No meal" }
           : {
               id: meal.recipe_id,
               title: meal.title ?? "",
@@ -103,6 +103,7 @@ export default function MealPlanCalendar({
 
     const isNoMeal = recipe.id === NO_MEAL_ID;
     const recipeId = isNoMeal ? null : recipe.id;
+    const customTitle = isNoMeal ? recipe.title : null;
     const keys = dates.map((d) => slotKey(d, category));
     const previous = keys.map((k) => plan[k]); // snapshot for rollback
 
@@ -113,7 +114,7 @@ export default function MealPlanCalendar({
           date,
           category,
           recipe_id: recipeId,
-          title: isNoMeal ? null : recipe.title,
+          title: isNoMeal ? customTitle : recipe.title,
           photo_url: isNoMeal ? null : recipe.photo_url,
           photo_position: isNoMeal ? null : recipe.photo_position,
           servings,
@@ -126,7 +127,7 @@ export default function MealPlanCalendar({
       const res = await fetch("/api/meal-plan", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ dates, category, recipe_id: recipeId, servings }),
+        body: JSON.stringify({ dates, category, recipe_id: recipeId, custom_title: customTitle, servings }),
       });
       if (!res.ok) throw new Error(await res.text());
       router.refresh();
@@ -369,11 +370,35 @@ function Cell({
 
   // Deliberate "No meal" slot — subtle, muted, not a link to a recipe.
   if (meal.recipe_id === null) {
+    const isCustom = meal.title && meal.title !== "No meal";
     return (
-      <div className="group relative flex items-center gap-2 min-h-[3.5rem] w-full rounded-lg border border-dashed border-gray-200 dark:border-zinc-800 bg-gray-50/60 dark:bg-zinc-900/40 p-1.5">
-        <div className="flex items-center gap-2 flex-1 min-w-0 pl-1.5 text-gray-400 dark:text-gray-500">
-          <Ban className="w-3.5 h-3.5 shrink-0" />
-          <span className="text-xs italic">No meal</span>
+      <div
+        className={cn(
+          "group relative flex items-center gap-2 min-h-[3.5rem] w-full rounded-lg p-1.5 transition-colors",
+          isCustom
+            ? "border border-gray-200 dark:border-zinc-800 bg-gray-100/50 dark:bg-zinc-800/50 hover:border-gray-300 dark:hover:border-zinc-700"
+            : "border border-dashed border-gray-200 dark:border-zinc-800 bg-gray-50/60 dark:bg-zinc-900/40"
+        )}
+      >
+        <div
+          className={cn(
+            "flex items-center gap-2 flex-1 min-w-0 pl-1.5",
+            isCustom ? "text-gray-700 dark:text-gray-300" : "text-gray-400 dark:text-gray-500"
+          )}
+        >
+          {isCustom ? (
+            <Utensils className="w-4 h-4 shrink-0 text-gray-500 dark:text-gray-400" />
+          ) : (
+            <Ban className="w-3.5 h-3.5 shrink-0" />
+          )}
+          <span
+            className={cn(
+              "text-xs line-clamp-2",
+              isCustom ? "font-medium" : "italic"
+            )}
+          >
+            {meal.title || "No meal"}
+          </span>
         </div>
         <div className="flex items-center gap-0.5 shrink-0 self-start opacity-100 md:opacity-0 md:group-hover:opacity-100 md:focus-within:opacity-100 transition-opacity">
           <button

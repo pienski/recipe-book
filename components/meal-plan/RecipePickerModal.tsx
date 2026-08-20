@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { ArrowLeft, Ban, Check, Loader2, Search, X } from "lucide-react";
+import { ArrowLeft, Ban, Check, Loader2, Search, X, Utensils } from "lucide-react";
 import { cn, getTagStyles } from "@/lib/utils";
 import { formatDayMonth, getTodayISO, type WeekDay } from "@/lib/dates";
 import { getSuggestions } from "@/lib/actions/meal-plan";
@@ -58,6 +58,7 @@ export default function RecipePickerModal({
   const [debounced, setDebounced] = useState("");
   const [items, setItems] = useState<PickerItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [customMealText, setCustomMealText] = useState("");
 
   const inDayStep = selectedRecipe !== null;
   const isNoMeal = selectedRecipe?.id === NO_MEAL_ID;
@@ -177,7 +178,11 @@ export default function RecipePickerModal({
               <div className="flex items-center gap-3 p-2 rounded-xl bg-gray-50 dark:bg-zinc-800/50">
                 <div className="w-12 h-12 shrink-0 rounded-lg overflow-hidden bg-gray-100 dark:bg-zinc-800 flex items-center justify-center">
                   {isNoMeal ? (
-                    <Ban className="w-5 h-5 text-gray-400" />
+                    selectedRecipe!.title !== "No meal" ? (
+                      <Utensils className="w-5 h-5 text-gray-400" />
+                    ) : (
+                      <Ban className="w-5 h-5 text-gray-400" />
+                    )
                   ) : selectedRecipe!.photo_url ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
@@ -295,8 +300,8 @@ export default function RecipePickerModal({
                 <Check className="w-4 h-4" />
                 {isNoMeal
                   ? selectedDates.length <= 1
-                    ? "Mark as No meal"
-                    : `Mark ${selectedDates.length} days as No meal`
+                    ? `Mark as ${selectedRecipe!.title}`
+                    : `Mark ${selectedDates.length} days as ${selectedRecipe!.title}`
                   : selectedDates.length <= 1
                     ? "Add meal"
                     : `Add to ${selectedDates.length} days`}
@@ -334,12 +339,26 @@ export default function RecipePickerModal({
                   {showAll ? `Filter to ${category}` : "Show all recipes"}
                 </button>
               </div>
-              <button
-                onClick={() => setSelectedRecipe(NO_MEAL_ITEM)}
-                className="self-start text-xs text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 hover:underline"
-              >
-                No meal this day
-              </button>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  placeholder="Custom meal / Skip meal"
+                  className="flex-1 px-3 py-1.5 text-sm border border-gray-100 dark:border-zinc-800 rounded-lg bg-gray-50 dark:bg-zinc-800/50 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                  value={customMealText}
+                  onChange={(e) => setCustomMealText(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      setSelectedRecipe({ ...NO_MEAL_ITEM, title: customMealText.trim() || "No meal" });
+                    }
+                  }}
+                />
+                <button
+                  onClick={() => setSelectedRecipe({ ...NO_MEAL_ITEM, title: customMealText.trim() || "No meal" })}
+                  className="px-4 py-1.5 text-sm bg-gray-100 dark:bg-zinc-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-zinc-700 font-medium transition-colors"
+                >
+                  Use
+                </button>
+              </div>
             </div>
 
             {/* List */}
