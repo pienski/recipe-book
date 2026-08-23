@@ -4,6 +4,11 @@ import { redirect } from "next/navigation";
 import RecipeList from "@/components/recipes/RecipeList";
 import AddRecipeDropdown from "@/components/recipes/AddRecipeDropdown";
 import { getRecipes, getAllTags } from "@/lib/actions/recipes";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Recipes",
+};
 
 export const dynamic = "force-dynamic";
 

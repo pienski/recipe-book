@@ -4,6 +4,11 @@ import { redirect } from "next/navigation";
 import { getPlannedMealsInRange } from "@/lib/actions/grocery";
 import { addDays, getTodayISO } from "@/lib/dates";
 import GroceryBuilder from "@/components/grocery/GroceryBuilder";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Groceries",
+};
 
 export const dynamic = "force-dynamic";
 

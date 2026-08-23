@@ -4,6 +4,11 @@ import { redirect } from "next/navigation";
 import { getWeekPlan } from "@/lib/actions/meal-plan";
 import { getWeekStart } from "@/lib/dates";
 import MealPlanCalendar from "@/components/meal-plan/MealPlanCalendar";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Plan",
+};
 
 export const dynamic = "force-dynamic";
 

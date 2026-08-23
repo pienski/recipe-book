@@ -3,6 +3,11 @@ import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { getNotes } from "@/lib/actions/notes";
 import NotesClient from "@/components/notes/NotesClient";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Notes",
+};
 
 export const dynamic = "force-dynamic";
 
