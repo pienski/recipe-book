@@ -611,7 +611,7 @@ export default function RecipeForm({
       setIsUploading(false);
     }
   };
-  const [servings, setServings] = useState(initialData?.servings || 2);
+  const [servings, setServings] = useState<number | "">(initialData?.servings || 2);
   const [tags, setTags] = useState<string[]>(initialData?.tags || []);
   const [newTag, setNewTag] = useState("");
   const handleNewTagChange = (value: string) => {
@@ -1191,7 +1191,7 @@ export default function RecipeForm({
       description,
       photo_url: photoUrl,
       photo_position: photoUrl ? photoPosition : null,
-      servings: Number(servings),
+      servings: Number(servings) || 1,
       tags,
       ingredients: finalIngredients,
       use_ingredient_groups: useIngredientGroups,
@@ -1369,7 +1369,15 @@ export default function RecipeForm({
                 min="1"
                 className="mt-1 w-full border dark:border-zinc-800 rounded-md px-3 py-2 bg-white dark:bg-zinc-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 outline-none transition-colors"
                 value={servings}
-                onChange={(e) => setServings(Number(e.target.value))}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setServings(val === "" ? "" : Number(val));
+                }}
+                onBlur={() => {
+                  if (servings === "" || Number(servings) < 1) {
+                    setServings(1);
+                  }
+                }}
               />
             </div>
           </div>
