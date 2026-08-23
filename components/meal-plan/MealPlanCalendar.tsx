@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Ban, ChevronLeft, ChevronRight, Copy, Pencil, Plus, X, Utensils } from "lucide-react";
@@ -38,8 +38,18 @@ export default function MealPlanCalendar({
   const [plan, setPlan] = useState<WeekPlan>(initialPlan);
   const [picker, setPicker] = useState<PickerState | null>(null);
   const [todayISO, setTodayISO] = useState<string | null>(null);
+  const mobileTodayRef = useRef<HTMLDivElement>(null);
 
   const days = useMemo(() => getWeekDates(weekStart), [weekStart]);
+
+  // Scroll to today on mobile
+  useEffect(() => {
+    if (todayISO && mobileTodayRef.current && mobileTodayRef.current.offsetParent !== null) {
+      // 64px for header + 16px extra padding = 80px offset
+      const y = mobileTodayRef.current.getBoundingClientRect().top + window.scrollY - 80;
+      window.scrollTo({ top: y, behavior: "smooth" });
+    }
+  }, [todayISO, weekStart]);
 
   // Compute "today" on the client only (avoids SSR/hydration timezone mismatch).
   useEffect(() => {
@@ -249,6 +259,7 @@ export default function MealPlanCalendar({
         {days.map((day) => (
           <div
             key={day.date}
+            ref={day.date === todayISO ? mobileTodayRef : null}
             className={cn(
               "rounded-xl border p-4",
               day.date === todayISO
