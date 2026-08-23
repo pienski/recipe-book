@@ -17,13 +17,35 @@ const OUTPUT_TYPE = "image/webp";
  */
 export async function optimizeImageForUpload(file: File): Promise<File> {
   try {
-    const compressed = await imageCompression(file, {
+    let inputFile = file;
+
+    // Check if the file is a HEIC/HEIF image
+    if (
+      inputFile.type === "image/heic" ||
+      inputFile.type === "image/heif" ||
+      inputFile.name.toLowerCase().endsWith(".heic") ||
+      inputFile.name.toLowerCase().endsWith(".heif")
+    ) {
+      // Dynamically import heic2any to avoid loading it when not needed
+      const heic2any = (await import("heic2any")).default;
+      const convertedBlob = await heic2any({
+        blob: inputFile,
+        toType: "image/jpeg",
+        quality: 1, // Max quality here, we'll compress in the next step
+      });
+      
+      const blob = Array.isArray(convertedBlob) ? convertedBlob[0] : convertedBlob;
+      const base = inputFile.name.replace(/\.[^./\\]+$/, "");
+      inputFile = new File([blob], `${base}.jpg`, { type: "image/jpeg" });
+    }
+
+    const compressed = await imageCompression(inputFile, {
       maxWidthOrHeight: MAX_EDGE,
       initialQuality: QUALITY,
       fileType: OUTPUT_TYPE,
       useWebWorker: true,
     });
-    const base = file.name.replace(/\.[^./\\]+$/, "");
+    const base = inputFile.name.replace(/\.[^./\\]+$/, "");
     return new File([compressed], `${base}.webp`, { type: OUTPUT_TYPE });
   } catch (err) {
     console.warn("Image optimization failed, uploading original", err);

@@ -1318,7 +1318,7 @@ export default function RecipeForm({
               <div className="space-y-2">
                 <input
                   type="file"
-                  accept="image/*"
+                  accept="image/*,.heic,.heif"
                   onChange={handleFileUpload}
                   disabled={isUploading}
                   className="block w-full text-sm text-gray-500 dark:text-gray-400
