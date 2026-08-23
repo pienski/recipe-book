@@ -212,63 +212,74 @@ function IngredientRow({
     >
       <button
         type="button"
-        className="mt-2 p-1 text-gray-400 cursor-grab active:cursor-grabbing hover:text-gray-600 dark:hover:text-gray-300"
+        className="mt-2 p-1 text-gray-400 cursor-grab active:cursor-grabbing hover:text-gray-600 dark:hover:text-gray-300 shrink-0"
         {...dragHandleProps}
         {...dragHandleListeners}
       >
         <GripVertical size={20} />
       </button>
-      <input
-        type="number"
-        step="any"
-        placeholder="Qty"
-        className="w-20 border dark:border-zinc-800 rounded-md px-3 py-2 bg-white dark:bg-zinc-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 outline-none transition-colors"
-        value={ingredient.amount}
-        onChange={(e) => onUpdate?.("amount", e.target.value)}
-      />
-      <input
-        type="text"
-        list={datalistId}
-        placeholder="Unit"
-        className="w-24 border dark:border-zinc-800 rounded-md px-3 py-2 bg-white dark:bg-zinc-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 outline-none transition-colors"
-        value={ingredient.unit || ""}
-        onChange={(e) => onUpdate?.("unit", e.target.value)}
-      />
-      <datalist id={datalistId}>
-        {filteredUnits.map((u) => (
-          <option key={u.singular} value={u.singular}>
-            {u.singular}
-          </option>
-        ))}
-      </datalist>
-      <div className="flex gap-1 items-center">
+
+      <div className="flex flex-col md:flex-row gap-2 flex-grow min-w-0">
+        <div className="flex flex-wrap sm:flex-nowrap gap-2 order-2 md:order-1">
+          <div className="flex gap-2">
+            <input
+              type="number"
+              step="any"
+              min="0"
+              placeholder="Qty"
+              className="w-20 border dark:border-zinc-800 rounded-md px-3 py-2 bg-white dark:bg-zinc-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 outline-none transition-colors"
+              value={ingredient.amount}
+              onChange={(e) => onUpdate?.("amount", e.target.value)}
+            />
+            <input
+              type="text"
+              list={datalistId}
+              placeholder="Unit"
+              className="w-24 border dark:border-zinc-800 rounded-md px-3 py-2 bg-white dark:bg-zinc-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 outline-none transition-colors"
+              value={ingredient.unit || ""}
+              onChange={(e) => onUpdate?.("unit", e.target.value)}
+            />
+            <datalist id={datalistId}>
+              {filteredUnits.map((u) => (
+                <option key={u.singular} value={u.singular}>
+                  {u.singular}
+                </option>
+              ))}
+            </datalist>
+          </div>
+          <div className="flex gap-1 items-center">
+            <input
+              type="number"
+              min="0"
+              placeholder="Metric"
+              className="w-24 border dark:border-zinc-800 rounded-md px-3 py-2 bg-white dark:bg-zinc-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 outline-none transition-colors"
+              value={ingredient.metric_amount || ""}
+              onChange={(e) => onUpdate?.("metric_amount", e.target.value)}
+            />
+            <select
+              className="border dark:border-zinc-800 rounded-md px-1 py-2 bg-white dark:bg-zinc-900 text-gray-900 dark:text-gray-100 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-colors"
+              value={ingredient.metric_unit || "g"}
+              onChange={(e) => onUpdate?.("metric_unit", e.target.value)}
+            >
+              <option value="g">g</option>
+              <option value="ml">ml</option>
+            </select>
+          </div>
+        </div>
+        
         <input
-          type="number"
-          placeholder="Metric"
-          className="w-24 border dark:border-zinc-800 rounded-md px-3 py-2 bg-white dark:bg-zinc-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 outline-none transition-colors"
-          value={ingredient.metric_amount || ""}
-          onChange={(e) => onUpdate?.("metric_amount", e.target.value)}
+          type="text"
+          placeholder="Ingredient name"
+          className="w-full md:w-auto md:flex-grow order-1 md:order-2 border dark:border-zinc-800 rounded-md px-3 py-2 bg-white dark:bg-zinc-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 outline-none transition-colors"
+          value={ingredient.name}
+          onChange={(e) => onUpdate?.("name", e.target.value)}
         />
-        <select
-          className="border dark:border-zinc-800 rounded-md px-1 py-2 bg-white dark:bg-zinc-900 text-gray-900 dark:text-gray-100 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-colors"
-          value={ingredient.metric_unit || "g"}
-          onChange={(e) => onUpdate?.("metric_unit", e.target.value)}
-        >
-          <option value="g">g</option>
-          <option value="ml">ml</option>
-        </select>
       </div>
-      <input
-        type="text"
-        placeholder="Ingredient name"
-        className="flex-grow border dark:border-zinc-800 rounded-md px-3 py-2 bg-white dark:bg-zinc-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 outline-none transition-colors"
-        value={ingredient.name}
-        onChange={(e) => onUpdate?.("name", e.target.value)}
-      />
+
       <button
         type="button"
         onClick={onRemove}
-        className="text-red-500 p-2 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
+        className="text-red-500 p-2 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors shrink-0"
       >
         &times;
       </button>
