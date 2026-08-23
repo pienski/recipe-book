@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { del } from "@vercel/blob";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -100,6 +101,14 @@ export async function DELETE(
 
     if (!deletedRecipe) {
       return new NextResponse("Not Found", { status: 404 });
+    }
+
+    if (deletedRecipe.photo_url) {
+      try {
+        await del(deletedRecipe.photo_url);
+      } catch (blobError) {
+        console.error("Failed to delete image from blob storage:", blobError);
+      }
     }
 
     return new NextResponse(null, { status: 204 });
