@@ -41,7 +41,7 @@ export default async function GroceryPage({ searchParams }: GroceryPageProps) {
     ? process.env.CATEGORIES.split(",").map((c) => c.trim()).filter(Boolean)
     : [];
 
-  const meals = await getPlannedMealsInRange(from, to);
+  const meals = await getPlannedMealsInRange(from, to, session.user.familyId);
 
   return (
     <div className="container mx-auto px-4 py-8">

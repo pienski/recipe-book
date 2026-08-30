@@ -24,6 +24,7 @@ export interface RangeMeal {
 export async function getPlannedMealsInRange(
   fromISO: string,
   toISO: string,
+  familyId: string,
 ): Promise<RangeMeal[]> {
   return db
     .select({
@@ -39,6 +40,12 @@ export async function getPlannedMealsInRange(
     })
     .from(mealPlan)
     .innerJoin(recipes, eq(mealPlan.recipe_id, recipes.id))
-    .where(and(gte(mealPlan.date, fromISO), lte(mealPlan.date, toISO)))
+    .where(
+      and(
+        eq(mealPlan.familyId, familyId),
+        gte(mealPlan.date, fromISO),
+        lte(mealPlan.date, toISO)
+      )
+    )
     .orderBy(asc(mealPlan.date));
 }

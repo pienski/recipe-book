@@ -4,7 +4,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { recipes, mealPlan } from "@/lib/db/schema";
-import { eq, sql } from "drizzle-orm";
+import { eq, sql, and } from "drizzle-orm";
 import IngredientList from "@/components/recipes/IngredientList";
 import DirectionSteps from "@/components/recipes/DirectionSteps";
 import DeleteButton from "@/components/recipes/DeleteButton";
@@ -56,7 +56,7 @@ export default async function RecipeDetailPage({ params }: RecipeDetailPageProps
   const [lastCookedRow] = await db
     .select({ date: sql<string | null>`max(${mealPlan.date})` })
     .from(mealPlan)
-    .where(eq(mealPlan.recipe_id, id));
+    .where(and(eq(mealPlan.recipe_id, id), eq(mealPlan.familyId, session.user.familyId)));
   // Keep the raw 'YYYY-MM-DD' string; date helpers parse it without UTC day-shift.
   const lastCookedIso = lastCookedRow?.date ?? null;
 

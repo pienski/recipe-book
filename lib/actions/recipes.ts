@@ -69,7 +69,13 @@ export async function getRecipes({
       }
     })
     .from(recipes)
-    .leftJoin(mealPlan, eq(recipes.id, mealPlan.recipe_id))
+    .leftJoin(
+      mealPlan,
+      and(
+        eq(recipes.id, mealPlan.recipe_id),
+        eq(mealPlan.familyId, familyId)
+      )
+    )
     .leftJoin(families, eq(recipes.familyId, families.id))
     .where(whereConditions.length > 0 ? and(...whereConditions) : undefined)
     .groupBy(recipes.id, families.id);
