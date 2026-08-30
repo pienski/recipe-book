@@ -4,6 +4,10 @@ import { recipes } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import RecipeForm from "@/components/recipes/RecipeForm";
 
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { redirect } from "next/navigation";
+
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: EditRecipePageProps) {
@@ -24,6 +28,9 @@ interface EditRecipePageProps {
 }
 
 export default async function EditRecipePage({ params }: EditRecipePageProps) {
+  const session = await getServerSession(authOptions);
+  if (!session) redirect("/login");
+
   const { id } = await params;
   
   const categories = process.env.CATEGORIES 
@@ -43,6 +50,10 @@ export default async function EditRecipePage({ params }: EditRecipePageProps) {
 
   if (!recipe) {
     notFound();
+  }
+
+  if (session.user.familyId !== recipe.familyId) {
+    redirect(`/recipes/${recipe.id}`);
   }
 
   const dbTags = new Set(allRecipes.flatMap((r) => r.tags as string[]));
