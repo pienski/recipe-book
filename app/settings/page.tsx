@@ -17,7 +17,8 @@ export default async function SettingsPage() {
       <SettingsForm 
         email={session.user.email} 
         name={session.user.name} 
-        appName={session.user.appName} 
+        appName={session.user.appName}
+        familyName={session.user.familyName}
       />
     </main>
   );

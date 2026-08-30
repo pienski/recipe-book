@@ -14,7 +14,7 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { name, appName, password } = await request.json();
+    const { name, appName, familyName, password } = await request.json();
 
     if (!name || typeof name !== "string") {
       return NextResponse.json({ error: "Invalid name" }, { status: 400 });
@@ -22,6 +22,10 @@ export async function PUT(request: Request) {
 
     if (!appName || typeof appName !== "string") {
       return NextResponse.json({ error: "Invalid app name" }, { status: 400 });
+    }
+
+    if (!familyName || typeof familyName !== "string") {
+      return NextResponse.json({ error: "Invalid family name" }, { status: 400 });
     }
 
     const updateData: any = { name };
@@ -38,10 +42,10 @@ export async function PUT(request: Request) {
       .set(updateData)
       .where(eq(users.email, session.user.email));
 
-    // Update family app name
+    // Update family app name and family name
     if (session.user.familyId) {
       await db.update(families)
-        .set({ appName })
+        .set({ appName, name: familyName })
         .where(eq(families.id, session.user.familyId));
     }
 

@@ -7,14 +7,17 @@ import { signOut, useSession } from "next-auth/react";
 export function SettingsForm({ 
   email, 
   name: initialName, 
-  appName: initialAppName 
+  appName: initialAppName,
+  familyName: initialFamilyName
 }: { 
   email: string; 
   name: string; 
   appName: string; 
+  familyName: string;
 }) {
   const [name, setName] = useState(initialName);
   const [appName, setAppName] = useState(initialAppName);
+  const [familyName, setFamilyName] = useState(initialFamilyName);
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isSaving, setIsSaving] = useState(false);
@@ -35,7 +38,7 @@ export function SettingsForm({
     }
 
     try {
-      const payload: any = { name, appName };
+      const payload: any = { name, appName, familyName };
       if (newPassword) {
         payload.password = newPassword;
       }
@@ -53,7 +56,7 @@ export function SettingsForm({
         throw new Error(data.error || "Failed to update settings");
       }
 
-      await update({ name, appName });
+      await update({ name, appName, familyName });
       setNewPassword("");
       setConfirmPassword("");
       setMessage({ text: "Settings saved successfully", type: "success" });
@@ -125,20 +128,35 @@ export function SettingsForm({
           </div>
         </div>
 
-        <div className="pt-4 border-t border-gray-100 dark:border-zinc-800">
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Family App Name
-          </label>
-          <input
-            type="text"
-            value={appName}
-            onChange={(e) => setAppName(e.target.value)}
-            className="w-full px-3 py-2 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-gray-100"
-            required
-          />
-          <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-            This will update the app name for everyone in your family.
-          </p>
+        <div className="pt-4 border-t border-gray-100 dark:border-zinc-800 space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Family Name
+            </label>
+            <input
+              type="text"
+              value={familyName}
+              onChange={(e) => setFamilyName(e.target.value)}
+              className="w-full px-3 py-2 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-gray-100"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Family App Name
+            </label>
+            <input
+              type="text"
+              value={appName}
+              onChange={(e) => setAppName(e.target.value)}
+              className="w-full px-3 py-2 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-gray-100"
+              required
+            />
+            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+              This will update the app name for everyone in your family.
+            </p>
+          </div>
         </div>
 
         {message.text && (

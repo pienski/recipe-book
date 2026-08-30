@@ -80,6 +80,7 @@ export const authOptions: NextAuthOptions = {
       if (trigger === "update" && session) {
         if (session.name) token.name = session.name;
         if (session.appName) token.appName = session.appName;
+        if (session.familyName) token.familyName = session.familyName;
       }
       return token;
     },
