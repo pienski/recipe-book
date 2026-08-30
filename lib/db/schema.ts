@@ -61,6 +61,10 @@ export const recipesRelations = relations(recipes, ({ one }) => ({
     fields: [recipes.createdByUserId],
     references: [users.id],
   }),
+  family: one(families, {
+    fields: [recipes.familyId],
+    references: [families.id],
+  }),
 }));
 
 // A planned/eaten meal slot. Assigning a recipe to a (date, category) cell in the

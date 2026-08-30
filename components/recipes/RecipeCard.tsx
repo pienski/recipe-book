@@ -3,8 +3,10 @@ import { Recipe } from "@/lib/db/schema";
 import { getTagStyles, cn } from "@/lib/utils";
 import { formatTimeAgo, formatFullDate } from "@/lib/dates";
 
+import { RecipeWithLastCooked } from "@/lib/actions/recipes";
+
 interface RecipeCardProps {
-  recipe: Recipe & { last_cooked_at: string | null };
+  recipe: RecipeWithLastCooked;
 }
 
 export default function RecipeCard({ recipe }: RecipeCardProps) {
@@ -58,6 +60,12 @@ export default function RecipeCard({ recipe }: RecipeCardProps) {
               <span className="opacity-60">👥</span> {recipe.servings}
             </span>
             <span className="opacity-30">·</span>
+            {recipe.family && (
+              <>
+                <span className="truncate max-w-[80px] sm:max-w-[120px]">By {recipe.family.name}</span>
+                <span className="opacity-30">·</span>
+              </>
+            )}
             <span>
               {recipe.updated_at && Math.abs(new Date(recipe.updated_at).getTime() - new Date(recipe.created_at).getTime()) > 86400000 
                 ? `Edited ${new Date(recipe.updated_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}`

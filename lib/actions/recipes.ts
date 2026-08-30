@@ -1,11 +1,11 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { recipes, mealPlan, Recipe } from "@/lib/db/schema";
+import { recipes, mealPlan, families, Recipe } from "@/lib/db/schema";
 import { desc, asc, eq, sql, and, ilike, or } from "drizzle-orm";
 
 // last_cooked_at is the max meal_plan.date ('YYYY-MM-DD' string), not a Date.
-export type RecipeWithLastCooked = Recipe & { last_cooked_at: string | null };
+export type RecipeWithLastCooked = Recipe & { last_cooked_at: string | null; family: { name: string } | null; };
 
 export type SortOption = "recently_added" | "recently_cooked" | "alphabetical";
 
@@ -47,6 +47,9 @@ export async function getRecipes({
   const query = db
     .select({
       id: recipes.id,
+      familyId: recipes.familyId,
+      createdByUserId: recipes.createdByUserId,
+      isShared: recipes.isShared,
       title: recipes.title,
       description: recipes.description,
       photo_url: recipes.photo_url,
@@ -61,11 +64,15 @@ export async function getRecipes({
       created_at: recipes.created_at,
       updated_at: recipes.updated_at,
       last_cooked_at: sql<string | null>`max(${mealPlan.date})`,
+      family: {
+        name: families.name,
+      }
     })
     .from(recipes)
     .leftJoin(mealPlan, eq(recipes.id, mealPlan.recipe_id))
+    .leftJoin(families, eq(recipes.familyId, families.id))
     .where(whereConditions.length > 0 ? and(...whereConditions) : undefined)
-    .groupBy(recipes.id);
+    .groupBy(recipes.id, families.id);
 
   if (sortBy === "recently_added") {
     query.orderBy(desc(recipes.created_at));

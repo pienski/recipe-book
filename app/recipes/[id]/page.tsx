@@ -44,6 +44,7 @@ export default async function RecipeDetailPage({ params }: RecipeDetailPageProps
     where: eq(recipes.id, id),
     with: {
       createdByUser: true,
+      family: true,
     }
   });
 
@@ -142,10 +143,10 @@ export default async function RecipeDetailPage({ params }: RecipeDetailPageProps
                   <span>·</span>
                 </>
               )}
-              {recipe.createdByUser && (
+              {recipe.family && (
                 <>
                   <span className="flex items-center gap-1">
-                    By <span className="font-medium text-gray-700 dark:text-gray-300">{recipe.createdByUser.name}</span>
+                    By <span className="font-medium text-gray-700 dark:text-gray-300">{recipe.family.name}</span>
                   </span>
                   <span>·</span>
                 </>
