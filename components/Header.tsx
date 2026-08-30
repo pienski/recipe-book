@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useSession, signOut } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -53,12 +53,12 @@ export function Header() {
               {link.label}
             </Link>
           ))}
-          <button
-            onClick={() => signOut({ callbackUrl: "/login" })}
-            className="text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors whitespace-nowrap"
+          <Link
+            href="/settings"
+            className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors whitespace-nowrap"
           >
-            Sign out
-          </button>
+            Settings
+          </Link>
         </nav>
 
         {/* Mobile Menu Button */}
@@ -87,12 +87,13 @@ export function Header() {
               {link.label}
             </Link>
           ))}
-          <button
-            onClick={() => signOut({ callbackUrl: "/login" })}
-            className="text-left font-medium text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
+          <Link
+            href="/settings"
+            className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors font-medium"
+            onClick={() => setIsMenuOpen(false)}
           >
-            Sign out
-          </button>
+            Settings
+          </Link>
         </nav>
       </div>
     </header>
