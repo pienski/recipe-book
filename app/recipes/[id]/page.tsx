@@ -133,7 +133,7 @@ export default async function RecipeDetailPage({ params }: RecipeDetailPageProps
               {isEditable && <DeleteButton recipeId={recipe.id} recipeTitle={recipe.title} />}
             </div>
             
-            <div className="flex items-center gap-2.5 text-xs text-gray-400 dark:text-gray-500">
+            <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs text-gray-400 dark:text-gray-500">
               {recipe.source_url && (
                 <>
                   <a
@@ -150,7 +150,7 @@ export default async function RecipeDetailPage({ params }: RecipeDetailPageProps
               )}
               {recipe.family && (
                 <>
-                  <span className="flex items-center gap-1">
+                  <span className="flex flex-wrap items-center gap-1">
                     By <span className="font-medium text-gray-700 dark:text-gray-300">{recipe.family.name}</span>
                   </span>
                   <span>·</span>
