@@ -578,6 +578,7 @@ export default function RecipeForm({
   const [photoPosition, setPhotoPosition] = useState(
     initialData?.photo_position || "50% 50%",
   );
+  const [isShared, setIsShared] = useState(initialData?.isShared || false);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -751,6 +752,7 @@ export default function RecipeForm({
       notes,
       sourceUrl,
       useIngredientGroups,
+      isShared,
     });
 
     if (initialFormState.current === null) {
@@ -771,6 +773,7 @@ export default function RecipeForm({
     notes,
     sourceUrl,
     useIngredientGroups,
+    isShared,
     mounted,
   ]);
 
@@ -1198,6 +1201,7 @@ export default function RecipeForm({
       directions: directions.map((d) => d.text).filter((t) => t.trim() !== ""),
       notes,
       source_url: sourceUrl,
+      isShared,
     };
 
     try {
@@ -1684,6 +1688,28 @@ export default function RecipeForm({
               onChange={(e) => setSourceUrl(e.target.value)}
               placeholder="Link to original recipe"
             />
+          </div>
+        </section>
+
+        {/* Sharing */}
+        <section className="space-y-4">
+          <h2 className="text-xl font-semibold border-b dark:border-zinc-800 pb-2 text-gray-900 dark:text-gray-100">
+            Sharing
+          </h2>
+          <div className="flex items-center gap-3 bg-white dark:bg-zinc-900 border dark:border-zinc-800 p-4 rounded-md">
+            <input
+              type="checkbox"
+              id="isShared"
+              className="w-5 h-5 rounded border-gray-300 dark:border-zinc-700 text-blue-600 focus:ring-blue-500 bg-gray-50 dark:bg-zinc-800"
+              checked={isShared}
+              onChange={(e) => setIsShared(e.target.checked)}
+            />
+            <label htmlFor="isShared" className="flex flex-col cursor-pointer">
+              <span className="font-medium text-gray-900 dark:text-gray-100">Share with other families</span>
+              <span className="text-sm text-gray-500 dark:text-gray-400">
+                If checked, anyone using the app can view this recipe (but only your family can edit it).
+              </span>
+            </label>
           </div>
         </section>
 

@@ -16,21 +16,14 @@ export const authOptions: NextAuthOptions = {
           return null;
         }
 
-        const user1Email = process.env.AUTH_USER_1_EMAIL?.trim();
-        const user1Hash = process.env.AUTH_USER_1_PASSWORD_HASH?.trim();
-        const user2Email = process.env.AUTH_USER_2_EMAIL?.trim();
-        const user2Hash = process.env.AUTH_USER_2_PASSWORD_HASH?.trim();
+        const { db } = await import("@/lib/db");
+        const { users } = await import("@/lib/db/schema");
+        const { eq } = await import("drizzle-orm");
 
-        if (!user1Email || !user1Hash) {
-          console.warn("Auth: User 1 credentials not configured in environment");
-        }
-
-        const users = [
-          { email: user1Email, passwordHash: user1Hash },
-          { email: user2Email, passwordHash: user2Hash },
-        ];
-
-        const user = users.find((u) => u.email === credentials.email);
+        const user = await db.query.users.findFirst({
+          where: eq(users.email, credentials.email),
+          with: { family: true }
+        });
 
         if (!user) {
           console.log(`Auth: No user found for email: ${credentials.email}`);
@@ -51,9 +44,12 @@ export const authOptions: NextAuthOptions = {
 
             if (isValid) {
               return {
-                id: user.email!,
+                id: user.id,
                 email: user.email,
-                name: user.email?.split("@")[0],
+                name: user.name,
+                familyId: user.familyId,
+                familyName: user.family?.name || "Recipe Book Family",
+                appName: user.family?.appName || "Recipe Book",
               };
             } else {
               console.log(`Auth: Invalid password for user: ${credentials.email}`);
@@ -74,10 +70,22 @@ export const authOptions: NextAuthOptions = {
     strategy: "jwt",
   },
   callbacks: {
+    async jwt({ token, user }) {
+      if (user) {
+        token.name = user.name;
+        token.familyId = user.familyId;
+        token.familyName = user.familyName;
+        token.appName = user.appName;
+      }
+      return token;
+    },
     async session({ session, token }) {
       if (token && session.user) {
-        session.user.name = token.name;
-        session.user.email = token.email;
+        session.user.name = token.name as string;
+        session.user.email = token.email as string;
+        session.user.familyId = token.familyId as string;
+        session.user.familyName = token.familyName as string;
+        session.user.appName = token.appName as string;
       }
       return session;
     },

@@ -2,8 +2,10 @@
 
 import { db } from "@/lib/db";
 import { mealPlan, recipes } from "@/lib/db/schema";
-import { and, eq, gte, lte, sql } from "drizzle-orm";
+import { and, eq, gte, lte, sql, or } from "drizzle-orm";
 import { addDays, daysBetween } from "@/lib/dates";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
 // ---- Suggestion tuning (keep recency primary; frequency a modest "liked" boost) ----
 const RECENT_EXCLUDE_DAYS = 4; // hard-exclude meals eaten within the last N days
@@ -29,6 +31,10 @@ export type WeekPlan = Record<string, PlannedMeal>;
 
 /** Planned meals for the week starting at `mondayISO` (Mon→Sun), keyed `${date}|${category}`. */
 export async function getWeekPlan(mondayISO: string): Promise<WeekPlan> {
+  const session = await getServerSession(authOptions);
+  if (!session) throw new Error("Unauthorized");
+  
+  const familyId = session.user.familyId;
   const sunday = addDays(mondayISO, 6);
 
   const rows = await db
@@ -45,7 +51,7 @@ export async function getWeekPlan(mondayISO: string): Promise<WeekPlan> {
     .from(mealPlan)
     // Left join: "No meal" rows have a null recipe_id and no matching recipe.
     .leftJoin(recipes, eq(mealPlan.recipe_id, recipes.id))
-    .where(and(gte(mealPlan.date, mondayISO), lte(mealPlan.date, sunday)));
+    .where(and(gte(mealPlan.date, mondayISO), lte(mealPlan.date, sunday), eq(mealPlan.familyId, familyId)));
 
   const plan: WeekPlan = {};
   for (const row of rows) {
@@ -89,6 +95,10 @@ export async function getSuggestions({
   today,
   all = false,
 }: GetSuggestionsParams): Promise<SuggestedRecipe[]> {
+  const session = await getServerSession(authOptions);
+  if (!session) throw new Error("Unauthorized");
+  
+  const familyId = session.user.familyId;
   const windowStart = addDays(today, -FREQ_WINDOW_DAYS);
 
   const rows = await db
@@ -99,11 +109,14 @@ export async function getSuggestions({
       photo_position: recipes.photo_position,
       tags: recipes.tags,
       last_eaten: sql<string | null>`max(${mealPlan.date})`,
-      freq: sql<number>`count(${mealPlan.id}) filter (where ${mealPlan.date} >= ${windowStart})`,
+      freq: sql<number>`count(${mealPlan.id}) filter (where ${mealPlan.date} >= ${windowStart} AND ${mealPlan.familyId} = ${familyId})`,
     })
     .from(recipes)
-    .leftJoin(mealPlan, eq(recipes.id, mealPlan.recipe_id))
-    .where(all ? undefined : sql`${recipes.tags} @> ${JSON.stringify([category])}::jsonb`)
+    .leftJoin(mealPlan, and(eq(recipes.id, mealPlan.recipe_id), eq(mealPlan.familyId, familyId)))
+    .where(and(
+      or(eq(recipes.familyId, familyId), eq(recipes.isShared, true)),
+      all ? undefined : sql`${recipes.tags} @> ${JSON.stringify([category])}::jsonb`
+    ))
     .groupBy(recipes.id);
 
   const scored: SuggestedRecipe[] = [];

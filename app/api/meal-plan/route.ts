@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { mealPlan, recipes } from "@/lib/db/schema";
-import { and, eq } from "drizzle-orm";
+import { and, eq, or } from "drizzle-orm";
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -56,7 +56,10 @@ export async function POST(request: Request) {
     // Look up the recipe only for real assignments (skip the lookup for "No meal").
     const recipe = recipe_id
       ? await db.query.recipes.findFirst({
-          where: eq(recipes.id, recipe_id),
+          where: and(
+            eq(recipes.id, recipe_id),
+            or(eq(recipes.familyId, session.user.familyId), eq(recipes.isShared, true))
+          ),
           columns: { id: true, title: true, photo_url: true, photo_position: true },
         })
       : null;
@@ -64,13 +67,13 @@ export async function POST(request: Request) {
       return new NextResponse("Recipe not found", { status: 400 });
     }
 
-    // One upsert covering every target cell; the unique (date, category) index
+    // One upsert covering every target cell; the unique (date, category, familyId) index
     // means re-assigning an occupied slot just overwrites it.
     await db
       .insert(mealPlan)
-      .values(dates.map((date) => ({ date, category, recipe_id, custom_title, servings })))
+      .values(dates.map((date) => ({ familyId: session.user.familyId, date, category, recipe_id, custom_title, servings })))
       .onConflictDoUpdate({
-        target: [mealPlan.date, mealPlan.category],
+        target: [mealPlan.date, mealPlan.category, mealPlan.familyId],
         set: { recipe_id, custom_title, servings },
       });
 
@@ -109,7 +112,7 @@ export async function DELETE(request: Request) {
 
     await db
       .delete(mealPlan)
-      .where(and(eq(mealPlan.date, date), eq(mealPlan.category, category)));
+      .where(and(eq(mealPlan.date, date), eq(mealPlan.category, category), eq(mealPlan.familyId, session.user.familyId)));
 
     return new NextResponse(null, { status: 204 });
   } catch (error) {

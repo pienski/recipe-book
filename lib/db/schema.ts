@@ -1,5 +1,6 @@
 import { pgTable, text, integer, timestamp, jsonb, boolean, date, unique } from "drizzle-orm/pg-core";
 import { createId } from "@paralleldrive/cuid2";
+import { relations } from "drizzle-orm";
 
 export type Ingredient = {
   name: string;
@@ -10,8 +11,36 @@ export type Ingredient = {
   group?: string | null;
 };
 
+export const families = pgTable("families", {
+  id: text("id").primaryKey().$defaultFn(() => createId()),
+  name: text("name").notNull(),
+  appName: text("app_name").notNull().default("Recipe Book"),
+  created_at: timestamp("created_at").notNull().defaultNow(),
+  updated_at: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const users = pgTable("users", {
+  id: text("id").primaryKey().$defaultFn(() => createId()),
+  name: text("name").notNull(),
+  email: text("email").notNull().unique(),
+  passwordHash: text("password_hash").notNull(),
+  familyId: text("family_id").notNull().references(() => families.id),
+  created_at: timestamp("created_at").notNull().defaultNow(),
+  updated_at: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const usersRelations = relations(users, ({ one }) => ({
+  family: one(families, {
+    fields: [users.familyId],
+    references: [families.id],
+  }),
+}));
+
 export const recipes = pgTable("recipes", {
   id: text("id").primaryKey().$defaultFn(() => createId()),
+  familyId: text("family_id").notNull().references(() => families.id),
+  createdByUserId: text("created_by_user_id").references(() => users.id),
+  isShared: boolean("is_shared").notNull().default(false),
   title: text("title").notNull(),
   description: text("description"),
   photo_url: text("photo_url"),
@@ -27,12 +56,20 @@ export const recipes = pgTable("recipes", {
   updated_at: timestamp("updated_at").notNull().defaultNow(),
 });
 
+export const recipesRelations = relations(recipes, ({ one }) => ({
+  createdByUser: one(users, {
+    fields: [recipes.createdByUserId],
+    references: [users.id],
+  }),
+}));
+
 // A planned/eaten meal slot. Assigning a recipe to a (date, category) cell in the
 // calendar IS the permanent record — past weeks constitute the meal history.
 export const mealPlan = pgTable(
   "meal_plan",
   {
     id: text("id").primaryKey().$defaultFn(() => createId()),
+    familyId: text("family_id").notNull().references(() => families.id),
     date: date("date", { mode: "string" }).notNull(), // 'YYYY-MM-DD'
     category: text("category").notNull(), // one of CATEGORIES env values
     // null = a deliberate "No meal" slot (distinct from an empty/undecided cell)
@@ -44,12 +81,13 @@ export const mealPlan = pgTable(
     servings: integer("servings").notNull().default(2),
     created_at: timestamp("created_at").notNull().defaultNow(),
   },
-  (t) => [unique("meal_plan_date_category_unique").on(t.date, t.category)],
+  (t) => [unique("meal_plan_date_category_family_unique").on(t.date, t.category, t.familyId)],
 );
 
 // Free-form notes (Notion-style). `content` holds Tiptap-produced HTML.
 export const notes = pgTable("notes", {
   id: text("id").primaryKey().$defaultFn(() => createId()),
+  familyId: text("family_id").notNull().references(() => families.id),
   title: text("title").notNull().default("Untitled"),
   content: text("content").notNull().default(""), // Tiptap HTML
   created_at: timestamp("created_at").notNull().defaultNow(),

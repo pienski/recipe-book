@@ -2,7 +2,7 @@
 
 import { db } from "@/lib/db";
 import { recipes, mealPlan, Recipe } from "@/lib/db/schema";
-import { desc, asc, eq, sql, and, ilike } from "drizzle-orm";
+import { desc, asc, eq, sql, and, ilike, or } from "drizzle-orm";
 
 // last_cooked_at is the max meal_plan.date ('YYYY-MM-DD' string), not a Date.
 export type RecipeWithLastCooked = Recipe & { last_cooked_at: string | null };
@@ -17,6 +17,9 @@ export interface GetRecipesParams {
   sortBy?: SortOption;
 }
 
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+
 export async function getRecipes({
   limit = 15,
   offset = 0,
@@ -24,7 +27,13 @@ export async function getRecipes({
   tags = [],
   sortBy = "recently_added",
 }: GetRecipesParams = {}) {
-  const whereConditions = [];
+  const session = await getServerSession(authOptions);
+  if (!session) throw new Error("Unauthorized");
+  
+  const familyId = session.user.familyId;
+  const whereConditions = [
+    or(eq(recipes.familyId, familyId), eq(recipes.isShared, true))!
+  ];
 
   if (search) {
     whereConditions.push(ilike(recipes.title, `%${search}%`));
@@ -73,8 +82,12 @@ export async function getRecipes({
 }
 
 export async function getAllTags() {
+  const session = await getServerSession(authOptions);
+  if (!session) throw new Error("Unauthorized");
+  
+  const familyId = session.user.familyId;
   const results = await db.execute(
-    sql`SELECT DISTINCT jsonb_array_elements_text(${recipes.tags}) as tag FROM ${recipes} ORDER BY tag ASC`
+    sql`SELECT DISTINCT jsonb_array_elements_text(${recipes.tags}) as tag FROM ${recipes} WHERE ${recipes.familyId} = ${familyId} OR ${recipes.isShared} = true ORDER BY tag ASC`
   );
   return results.map((r) => r.tag as string);
 }

@@ -4,7 +4,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { recipes } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, and, or } from "drizzle-orm";
 
 export async function GET(
   request: Request,
@@ -19,7 +19,10 @@ export async function GET(
   try {
     const { id } = await params;
     const recipe = await db.query.recipes.findFirst({
-      where: eq(recipes.id, id),
+      where: and(
+        eq(recipes.id, id),
+        or(eq(recipes.familyId, session.user.familyId), eq(recipes.isShared, true))
+      ),
     });
 
     if (!recipe) {
@@ -46,7 +49,7 @@ export async function PUT(
   try {
     const { id } = await params;
     const body = await request.json();
-    const { title, description, photo_url, photo_position, tags, servings, ingredients, use_ingredient_groups, directions, notes, source_url } = body;
+    const { title, description, photo_url, photo_position, tags, servings, ingredients, use_ingredient_groups, directions, notes, source_url, isShared } = body;
 
     if (!title || !servings || !ingredients || !directions) {
       return new NextResponse("Missing required fields", { status: 400 });
@@ -56,6 +59,7 @@ export async function PUT(
       .update(recipes)
       .set({
         title,
+        isShared: !!isShared,
         description,
         photo_url,
         photo_position,
@@ -68,7 +72,7 @@ export async function PUT(
         source_url,
         updated_at: new Date(),
       })
-      .where(eq(recipes.id, id))
+      .where(and(eq(recipes.id, id), eq(recipes.familyId, session.user.familyId)))
       .returning();
 
     if (!updatedRecipe) {
@@ -96,7 +100,7 @@ export async function DELETE(
     const { id } = await params;
     const [deletedRecipe] = await db
       .delete(recipes)
-      .where(eq(recipes.id, id))
+      .where(and(eq(recipes.id, id), eq(recipes.familyId, session.user.familyId)))
       .returning();
 
     if (!deletedRecipe) {

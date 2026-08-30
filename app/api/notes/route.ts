@@ -14,7 +14,7 @@ export async function POST() {
   try {
     const [newNote] = await db
       .insert(notes)
-      .values({ title: "", content: "" })
+      .values({ familyId: session.user.familyId, title: "", content: "" })
       .returning();
 
     return NextResponse.json(newNote);

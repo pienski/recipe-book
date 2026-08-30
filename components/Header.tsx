@@ -21,7 +21,7 @@ export function Header() {
     { href: "/grocery", label: "Groceries" },
   ];
 
-  const appName = process.env.APP_NAME || "Ginger";
+  const appName = session?.user?.appName || "Recipe Book";
 
   return (
     <header className="bg-white dark:bg-zinc-900 border-b border-gray-100 dark:border-zinc-800 transition-colors duration-300 sticky top-0 z-50">

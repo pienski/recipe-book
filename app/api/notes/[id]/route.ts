@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { notes } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 
 export async function PUT(
   request: Request,
@@ -31,7 +31,7 @@ export async function PUT(
         content,
         updated_at: new Date(),
       })
-      .where(eq(notes.id, id))
+      .where(and(eq(notes.id, id), eq(notes.familyId, session.user.familyId)))
       .returning();
 
     if (!updatedNote) {
@@ -58,7 +58,7 @@ export async function DELETE(
     const { id } = await params;
     const [deletedNote] = await db
       .delete(notes)
-      .where(eq(notes.id, id))
+      .where(and(eq(notes.id, id), eq(notes.familyId, session.user.familyId)))
       .returning();
 
     if (!deletedNote) {

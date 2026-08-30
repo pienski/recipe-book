@@ -42,6 +42,9 @@ export default async function RecipeDetailPage({ params }: RecipeDetailPageProps
   
   const recipe = await db.query.recipes.findFirst({
     where: eq(recipes.id, id),
+    with: {
+      createdByUser: true,
+    }
   });
 
   if (!recipe) {
@@ -136,6 +139,14 @@ export default async function RecipeDetailPage({ params }: RecipeDetailPageProps
                   >
                     <ExternalLink className="w-3 h-3" /> Source
                   </a>
+                  <span>·</span>
+                </>
+              )}
+              {recipe.createdByUser && (
+                <>
+                  <span className="flex items-center gap-1">
+                    By <span className="font-medium text-gray-700 dark:text-gray-300">{recipe.createdByUser.name}</span>
+                  </span>
                   <span>·</span>
                 </>
               )}
