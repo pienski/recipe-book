@@ -53,6 +53,7 @@ export default function MealPlanCalendar({
 
   // Compute "today" on the client only (avoids SSR/hydration timezone mismatch).
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setTodayISO(getTodayISO());
   }, []);
 

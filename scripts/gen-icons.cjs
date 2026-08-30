@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 // One-off icon generator. Run: node scripts/gen-icons.cjs
 // Source is the user's original 256x256 favicon (recovered from git), so the
 // existing artwork/framing is preserved — we only downscale and add sizes.

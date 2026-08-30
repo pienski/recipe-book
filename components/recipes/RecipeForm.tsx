@@ -30,7 +30,6 @@ import {
   getTagStyles,
   cn,
   PREDEFINED_UNITS,
-  getPluralizedUnit,
 } from "@/lib/utils";
 import RecipeCreatedCelebration from "./RecipeCreatedCelebration";
 import spriteSheet from "@/app/assets/sprite_sheet.webp";
@@ -131,6 +130,7 @@ function PhotoRepositioner({
             : "cursor-default",
         )}
       >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={src}
           alt="Recipe preview"
@@ -551,6 +551,7 @@ export default function RecipeForm({
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);
 

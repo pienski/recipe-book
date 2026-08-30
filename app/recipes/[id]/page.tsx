@@ -1,4 +1,5 @@
 import { notFound, redirect } from "next/navigation";
+/* eslint-disable @next/next/no-img-element */
 import Link from "next/link";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";

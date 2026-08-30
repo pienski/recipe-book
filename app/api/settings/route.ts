@@ -28,7 +28,7 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: "Invalid family name" }, { status: 400 });
     }
 
-    const updateData: any = { name };
+    const updateData: Record<string, unknown> = { name };
 
     if (password) {
       if (typeof password !== "string" || password.length < 6) {

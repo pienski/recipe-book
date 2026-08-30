@@ -38,7 +38,7 @@ export function SettingsForm({
     }
 
     try {
-      const payload: any = { name, appName, familyName };
+      const payload: Record<string, string> = { name, appName, familyName };
       if (newPassword) {
         payload.password = newPassword;
       }
@@ -61,9 +61,9 @@ export function SettingsForm({
       setConfirmPassword("");
       setMessage({ text: "Settings saved successfully", type: "success" });
       router.refresh();
-    } catch (error: any) {
+    } catch (error) {
       console.error(error);
-      setMessage({ text: error.message || "Error saving settings", type: "error" });
+      setMessage({ text: error instanceof Error ? error.message : "Error saving settings", type: "error" });
     } finally {
       setIsSaving(false);
     }

@@ -1,5 +1,6 @@
+/* eslint-disable @next/next/no-img-element */
 import Link from "next/link";
-import { Recipe } from "@/lib/db/schema";
+
 import { getTagStyles, cn } from "@/lib/utils";
 import { formatTimeAgo, formatFullDate } from "@/lib/dates";
 

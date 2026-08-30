@@ -81,6 +81,7 @@ export default function RecipePickerModal({
   // Fetch: ranked suggestions when empty, title search via getRecipes otherwise.
   useEffect(() => {
     let cancelled = false;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true);
     (async () => {
       let result: PickerItem[];
