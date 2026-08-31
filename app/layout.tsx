@@ -14,15 +14,21 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const appName = process.env.APP_NAME || "Ginger";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth";
 
-export const metadata: Metadata = {
-  title: {
-    default: appName,
-    template: `%s | ${appName}`,
-  },
-  description: "A personal recipe manager for two.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const session = await getServerSession(authOptions);
+  const appName = session?.user?.appName || "Ginger";
+  
+  return {
+    title: {
+      default: appName,
+      template: `%s | ${appName}`,
+    },
+    description: "A personal recipe manager for two.",
+  };
+}
 
 export default function RootLayout({
   children,

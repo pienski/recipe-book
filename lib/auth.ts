@@ -49,7 +49,7 @@ export const authOptions: NextAuthOptions = {
                 name: user.name,
                 familyId: user.familyId,
                 familyName: user.family?.name || "Recipe Book Family",
-                appName: user.family?.appName || "Recipe Book",
+                appName: user.family?.appName || "Ginger",
               };
             } else {
               console.log(`Auth: Invalid password for user: ${credentials.email}`);

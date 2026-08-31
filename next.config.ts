@@ -1,9 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  env: {
-    APP_NAME: process.env.APP_NAME || "Ginger",
-  },
+  // Config options
 };
 
 export default nextConfig;

@@ -14,7 +14,7 @@ export type Ingredient = {
 export const families = pgTable("families", {
   id: text("id").primaryKey().$defaultFn(() => createId()),
   name: text("name").notNull(),
-  appName: text("app_name").notNull().default("Recipe Book"),
+  appName: text("app_name").notNull().default("Ginger"),
   created_at: timestamp("created_at").notNull().defaultNow(),
   updated_at: timestamp("updated_at").notNull().defaultNow(),
 });
